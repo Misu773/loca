@@ -112,33 +112,69 @@
             padding: 20px;
         }
         #commentaires-container {
-    max-width: 600px;
-    margin: 20px auto;
-    text-align: left;
-    }
-
-.commentaire {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    #commentaires-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 20px auto;
     text-align: left;
     display: none; /* Caché initialement */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .commentaire {
     background: white;
     padding: 15px;
-    margin: 10px 0;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: none; /* Caché initialement */
+    margin: 0;
+}
+
+.commentaire:nth-child(3) {
+    grid-column: 1 / -1;
+    max-width: 100%;
+}
+
+#votre-destination {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #000000;
+}
+
+#votre-destination form {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    color: #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#votre-destination label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#votre-destination input {
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+}
+
+#votre-destination input:focus {
+    border-color: #667eea;
+    outline: none;
+}
+
+#votre-destination .btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    font-size: 16px;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+#votre-destination .btn:hover {
+    transform: translateY(-2px);
 }
 
     </style>
@@ -165,7 +201,7 @@
         <h3>🌍 Voyager à travers le monde</h3>
         <div>
             <a href="#accueil">Accueil</a>
-            <a href="#destinations">Votre Destination</a>
+            <a href="#votre-destination">Votre Destination</a>
             <a href="#carte">Carte</a>
             <a href="#contact">Contact</a>
         </div>
@@ -174,7 +210,7 @@
     <div class="hero">
         <h1 style="font-family: 'Georgia', serif;">Découvrez le Monde</h1>
         <p>Partez à l'aventure entre les continents</p>
-        <a href="#destinations" class="btn">Commencer</a>
+        <a href="#votre-destination" class="btn">Commencer</a>
     </div>
 </header>
 <main>
@@ -195,12 +231,33 @@
             </div>
         </div>
     </section>
+    
 
-    <section id="carte" style="text-align:center">
+    <section id="votre-destination" style="text-align:center; padding:40px; background:none;">
+    <h2>Votre Destination</h2>
+    <p>Veuillez remplir les informations ci-dessous pour planifier votre voyage</p>
+    
+    <form style="max-width:500px; margin:auto; text-align:left;">
+        <label><strong>D'où venez-vous ?*</strong></label>
+        <input type="text" required placeholder="Ex: Paris, France" style="width:100%; padding:8px; margin-bottom:15px;">
+        
+        <label><strong>Où voulez-vous aller ?*</strong></label>
+        <input type="text" required placeholder="Ex: Tokyo, Japon" style="width:100%; padding:8px; margin-bottom:15px;">
+        
+        <label><strong>Tarif (EU)*</strong></label>
+        <input type="number" required min="0" step="1.00" placeholder="Ex: 1500" style="width:100%; padding:8px; margin-bottom:15px;">
+        
+        <button type="submit" class="btn" style="width:100%; padding:14px; background:#e17a35; color:white; border:none; border-radius:8px; cursor:pointer;">
+            Calculer mon voyage
+        </button>
+    </form>
+    </section>
+
+
+ <section id="carte" style="text-align:center">
     <h2>Où nous trouver</h2>
     <iframe src="https://www.google.com/maps?q=Lille&output=embed"></iframe>
     
-</section>
 
     <section>
         <section id="contact">
@@ -368,7 +425,7 @@
 
     <section id="afficher-plus" style="text-align:center; padding:40px; background:#f5f5f5;">
         <h2>Commentaires</h2>
-        <p id="instruction-texte">Cliquez pour afficher plus de contenu...</p>
+        <p id="instruction-texte">Cliquez pour afficher les commentaires...</p>
         
         <!-- Conteneur pour les commentaires -->
         <div id="commentaires-container">
@@ -396,7 +453,7 @@
     
     // Afficher/masquer les commentaires
     if (container.style.display === 'none' || container.style.display === '') {
-        container.style.display = 'block';
+        container.style.display = 'grid';
         bouton.textContent = 'Masquer les commentaires';
         instruction.textContent = 'Cliquez pour masquer les commentaires...';
         
@@ -404,7 +461,7 @@
         commentaires.forEach((commentaire, index) => {
             setTimeout(() => {
                 commentaire.style.display = 'block';
-            }, index * 0);
+            }, index * 500); // Délai de 500ms entre chaque commentaire
         });
     } else {
         container.style.display = 'none';
