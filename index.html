@@ -71,7 +71,6 @@
             width: 250px;
             box-shadow: 0px 4px 10px rgba(255, 252, 252, 0.1);
             border: 3px solid #e17a35;
-            
         }
 
         .card img {
@@ -100,6 +99,10 @@
             width: 100%;
             margin-bottom: 10px;
             padding: 8px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            background-color: #e17a359e;
         }
 
         footer {
@@ -136,7 +139,7 @@
             <div class="card">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mairie_clermont_oise.JPG" alt="Mairie de Clermont">
                 <h3>Clermont</h3>
-                <p>La ville historique dans l'Oise.</p>
+                <p>La ville historique.</p>
             </div>
 
             <div class="card">
@@ -147,11 +150,11 @@
         </div>
     </section>
 
-    <section> 
-        style="text-align:center">
+    <section style="text-align:center">
         <h2>Où nous trouver</h2>
         <iframe src="https://www.google.com/maps?q=Lille&output=embed"></iframe>
     </section>
+
     <section>
         <h2 style="text-align:center">Contact</h2>
         <form>
@@ -161,13 +164,12 @@
             <label>Email</label>
             <input type="email">
 
-            <label>Commentaire</label>
+            <label>Message</label>
             <textarea></textarea>
 
-            <button type="submit">Envoyer</button>
+            <button type="submit" class="btn">Envoyer</button>
         </form>
     </section>
-        
 
 </main>
 
