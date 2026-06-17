@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voyager à travers le monde</title>
-      <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
           <style>
         body {
             margin: 0;
@@ -162,7 +163,7 @@
 }
 
 #votre-destination input:focus {
-    border-color: #667eea;
+    border-color:#667eea;
     outline: none;
 }
 
@@ -175,6 +176,135 @@
 
 #votre-destination .btn:hover {
     transform: translateY(-2px);
+}
+
+#ages-container {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 1px solid #ddd;
+}
+
+#ages-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#ages-container input {
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.btn-repondre {
+    background: #e17a35;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.85em;
+    margin-top: 8px;
+}
+
+.btn-repondre:hover {
+    background: #c66520;
+}
+
+.reponses {
+    margin-left: 25px;
+    padding-left: 15px;
+    border-left: 3px solid #e17a35;
+    margin-top: 10px;
+}
+
+.reponse {
+    background: #f9f9f9;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+}
+
+.reponse p {
+    margin: 3px 0;
+}
+
+.form-reponse-inner {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-reponse-inner input,
+.form-reponse-inner textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.form-reponse-inner textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.form-reponse-inner button {
+    background: #e17a35;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.form-reponse-inner button:last-child {
+    background: #999;
+}
+
+.form-reponse-inner button:hover {
+    opacity: 0.9;
+}
+
+.admin-link {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.7em;
+    z-index: 999;
+}
+.admin-link a {
+    color: #ccc;
+    text-decoration: none;
+}
+.admin-link a:hover {
+    color: #999;
+}
+
+.btn-supprimer {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.75em;
+    margin-left: 8px;
+    display: none;
+}
+.mode-admin .btn-supprimer {
+    display: inline-block;
+}
+.btn-supprimer:hover {
+    background: #962d22;
 }
 
     </style>
@@ -221,13 +351,14 @@
             <div class="card">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mairie_clermont_oise.JPG" alt="Mairie de Clermont">
                 <h3>Clermont</h3>
-                <p>La ville historique.</p>
+                <p>Ville dans l'Oise, au Nord de Paris.</p>
             </div>
+
 
             <div class="card">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Mairie_de_Lomme.jpg" alt="Mairie de Lomme">
                 <h3>Lomme</h3>
-                <p>La ville en périphérie de Lille.</p>
+                <p>Ville en périphérie de Lille.</p>
             </div>
         </div>
     </section>
@@ -237,16 +368,59 @@
     <h2>Votre Destination</h2>
     <p>Veuillez remplir les informations ci-dessous pour planifier votre voyage</p>
     
+
     <form style="max-width:500px; margin:auto; text-align:left;">
         <label><strong>D'où venez-vous ?*</strong></label>
         <input type="text" required placeholder="Ex: Paris, France" style="width:100%; padding:8px; margin-bottom:15px;">
         
+
         <label><strong>Où voulez-vous aller ?*</strong></label>
         <input type="text" required placeholder="Ex: Tokyo, Japon" style="width:100%; padding:8px; margin-bottom:15px;">
         
-        <label><strong>Tarif (EU)*</strong></label>
-        <input type="number" required min="0" step="1.00" placeholder="Ex: 1500" style="width:100%; padding:8px; margin-bottom:15px;">
+
+        <label><strong>Budget (EU)*</strong></label>
+        <input type="number" required min="0" step="1" placeholder="Ex: 1500" style="width:100%; padding:8px; margin-bottom:15px;">
+    
         
+        <!-- À l'intérieur du formulaire dans la section Votre Destination -->
+        <label><strong>Combien de voyageur ?*</strong></label>
+    <input type="number" id="nombre-voyageurs" min="1" placeholder="Ex: 2" style="width:100%; padding:8px; margin-bottom:15px;">
+    <div id="ages-container" style="display:none;">
+    <!-- Les champs d'âge seront ajoutés ici -->
+    </div>
+
+    <script>
+    document.getElementById('nombre-voyageurs').addEventListener('input', function() {
+    const nombre = parseInt(this.value);
+    const agesContainer = document.getElementById('ages-container');
+    
+    if (nombre && nombre > 0) {
+        // Afficher les champs d'âge
+        agesContainer.style.display = 'block';
+        agesContainer.innerHTML = '';
+        
+        for (let i = 1; i <= nombre; i++) {
+            const div = document.createElement('div');
+            div.style.marginBottom = '10px';
+            div.innerHTML = `
+                <label><strong>Âge du voyageur ${i}*</strong></label>
+                <input type="number" min="0" max="120" placeholder="Ex: 25" 
+                       style="width:100%; padding:8px;">
+            `;
+            agesContainer.appendChild(div);
+        }
+    } else {
+        // Masquer les champs d'âge
+        agesContainer.style.display = 'none';
+        agesContainer.innerHTML = '';
+    }
+    });
+    </script>
+
+    <label><strong>Moyen de transport ?*</strong></label>
+        <input type="text" required placeholder="Ex: Avion, Train" style="width:100%; padding:8px; margin-bottom:15px;">
+
+
         <button type="submit" class="btn" style="width:100%; padding:14px; background:#e17a35; color:white; border:none; border-radius:8px; cursor:pointer;">
             Calculer mon voyage
         </button>
@@ -261,17 +435,19 @@
 
     <section>
         <section id="contact">
-    <h2 style="text-align:center">Contact</h2>
-</section>
-        <p style="text-align:right;max-width:400px;margin:auto;font-size:0.85em;">(* = Obligatoire)</p>
-        <form>
-            <label><strong>Nom d'utilisateur</strong>*</label>
-            <input type="text" required oninvalid="this.setCustomValidity('Veuillez completer la case')" oninput="this.setCustomValidity('')">
-
-            
-            <label><strong>Lieu visité</strong>*</label>
-            <select required id="lieu-select">
+    <h2 style="text-align:center">Contact</h2> 
+    <p style="text-align:right;max-width:400px;margin:auto;font-size:0.85em;">(* = Obligatoire)</p>
+    <!-- Dans la section Contact, modifier le formulaire : -->
+    <form id="contact-form">
+    <!-- Champs existants -->
+    <label><strong>Nom d'utilisateur</strong>*</label>
+    <input type="text" required oninvalid="this.setCustomValidity('Veuillez completer la case')" oninput="this.setCustomValidity('')">
+    
+    <!-- Ajouter id au select -->
+    <label><strong>Lieu visité</strong>*</label>
+    <select required id="lieu-select">
                 <option value="" style="opacity: 0.7;">Sélectionnez une ville...</option>
+                <option value="Autre">Autre (veuillez spécifier)</option>
                 <option value="Abu Dhabi">Abu Dhabi</option>
                 <option value="Accra">Accra</option>
                 <option value="Addis Ababa">Addis Ababa</option>
@@ -412,16 +588,18 @@
                 <option value="Zagreb">Zagreb</option>
                 <option value="Zanzibar">Zanzibar</option>
                 <option value="Zürich">Zürich</option>
-                <option value="Autre">Autre (veuillez spécifier)</option>
             </select>
             <input type="text" id="autre-lieu" style="display:none; margin-top: 10px;" placeholder="Veuillez spécifier votre lieu">
+    
+    <!-- Ajouter id au textarea -->
+    <label><strong>Commentaire</strong></label>
+    <textarea id="commentaire-input" placeholder="(Optionnel)"></textarea>
+    
+    <!-- Bouton avec id -->
+    <button type="submit" class="btn" id="submit-button">Envoyer</button>
+</form>
+</section>
 
-            <label><strong>Commentaire</strong></label>
-            <textarea placeholder="(Optionnel)"></textarea>
-
-            <button type="submit" class="btn">Envoyer</button>
-        </form>
-    </section>
 
     <section id="afficher-plus" style="text-align:center; padding:40px; background:#f5f5f5;">
         <h2>Commentaires</h2>
@@ -444,53 +622,184 @@
     </section>
 
     <script>
+    // ===== Supabase (avec fallback silencieux) =====
+    const SUPABASE_URL = 'https://cvskoyqlreuckynebwdv.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_Ts1_6hbE1s_R264zCGRMAw_6goMkJON';
+    let _supabase = null;
+    try { _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { console.warn('Supabase non disponible'); }
 
-    function afficherPlus() {
-    const container = document.getElementById('commentaires-container');
-    const commentaires = document.querySelectorAll('.commentaire');
-    const bouton = document.querySelector('#afficher-plus button');
-    const instruction = document.getElementById('instruction-texte');
-    
-    // Afficher/masquer les commentaires
-    if (container.style.display === 'none' || container.style.display === '') {
-        container.style.display = 'grid';
-        bouton.textContent = 'Masquer les commentaires';
-        instruction.textContent = 'Cliquez pour masquer les commentaires...';
-        
-        // Afficher chaque commentaire avec un délai
-        commentaires.forEach((commentaire, index) => {
-            setTimeout(() => {
-                commentaire.style.display = 'block';
-            }, index * 500); // Délai de 500ms entre chaque commentaire
-        });
-    } else {
-        container.style.display = 'none';
-        bouton.textContent = 'Afficher plus';
-        instruction.textContent = 'Cliquez pour afficher plus de contenu...';
-        
-        // Masquer tous les commentaires
-        commentaires.forEach(commentaire => {
-            commentaire.style.display = 'none';
-        });
-    }
-}
+    let commentairesAffiches = false;
+    let motDePasseAdmin = '';
 
-    // Afficher/masquer le champ de texte "Autre" lorsque "Autre" est sélectionné
-    document.getElementById('lieu-select').addEventListener('change', function() {
-        const autreInput = document.getElementById('autre-lieu');
-        if (this.value === 'Autre') {
-            autreInput.style.display = 'block';
-            autreInput.required = true;
-        } else {
-            autreInput.style.display = 'none';
-            autreInput.required = false;
-            autreInput.value = '';
+    document.addEventListener('DOMContentLoaded', function() {
+        const lieuSelect = document.getElementById('lieu-select');
+        if (lieuSelect) {
+            lieuSelect.addEventListener('change', function() {
+                const autreInput = document.getElementById('autre-lieu');
+                if (autreInput) {
+                    autreInput.style.display = this.value === 'Autre' ? 'block' : 'none';
+                    if (this.value !== 'Autre') autreInput.value = '';
+                }
+            });
         }
     });
-    
+
+    async function chargerCommentaires() {
+        const { data, error } = await _supabase
+            .from('commentaires')
+            .select('*')
+            .is('parent_id', null)
+            .order('created_at', { ascending: false });
+        if (error) { console.error(error); return []; }
+        return data || [];
+    }
+
+    async function chargerReponses(parentId) {
+        const { data, error } = await _supabase
+            .from('commentaires')
+            .select('*')
+            .eq('parent_id', parentId)
+            .order('created_at', { ascending: true });
+        if (error) { console.error(error); return []; }
+        return data || [];
+    }
+
+    async function afficherCommentaires() {
+        const container = document.getElementById('commentaires-container');
+        container.innerHTML = '';
+        const commentaires = await chargerCommentaires();
+        for (const c of commentaires) {
+            const div = document.createElement('div');
+            div.className = 'commentaire';
+            div.style.display = 'block';
+            const date = new Date(c.created_at).toLocaleDateString('fr-FR');
+            div.innerHTML = `
+                <p><strong>${c.nom}</strong> · <small>${date}</small></p>
+                <p>Lieu visité : ${c.lieu}</p>
+                <p>"${c.commentaire}"</p>
+                <button class="btn-repondre" onclick="repondre('${c.id}')">Répondre</button>
+                <button class="btn-supprimer" onclick="supprimerCommentaire('${c.id}')">🗑 Supprimer</button>
+                <div id="reponses-${c.id}" class="reponses"></div>
+                <div id="form-reponse-${c.id}" class="form-reponse" style="display:none;"></div>
+            `;
+            container.appendChild(div);
+            const reponsesDiv = div.querySelector(`#reponses-${c.id}`);
+            const reponses = await chargerReponses(c.id);
+            reponses.forEach(r => {
+                const rDiv = document.createElement('div');
+                rDiv.className = 'reponse';
+                const rDate = new Date(r.created_at).toLocaleDateString('fr-FR');
+                rDiv.innerHTML = `<p><strong>${r.nom}</strong> · <small>${rDate}</small></p><p>"${r.commentaire}"</p>`;
+                reponsesDiv.appendChild(rDiv);
+            });
+        }
+    }
+
+    function repondre(commentaireId) {
+        const formDiv = document.getElementById(`form-reponse-${commentaireId}`);
+        if (formDiv.style.display === 'block') {
+            formDiv.style.display = 'none';
+            formDiv.innerHTML = '';
+            return;
+        }
+        formDiv.style.display = 'block';
+        formDiv.innerHTML = `
+            <div class="form-reponse-inner">
+                <input type="text" id="reponse-nom-${commentaireId}" placeholder="Votre nom" required>
+                <textarea id="reponse-msg-${commentaireId}" placeholder="Votre réponse..." required></textarea>
+                <button onclick="envoyerReponse('${commentaireId}')">Envoyer</button>
+                <button onclick="this.closest('.form-reponse').style.display='none'">Annuler</button>
+            </div>
+        `;
+    }
+
+    async function envoyerReponse(commentaireId) {
+        const nom = document.getElementById(`reponse-nom-${commentaireId}`)?.value.trim();
+        const msg = document.getElementById(`reponse-msg-${commentaireId}`)?.value.trim();
+        if (!nom || !msg) { alert('Veuillez remplir tous les champs'); return; }
+        const { error } = await _supabase.from('commentaires').insert({
+            parent_id: commentaireId, nom, lieu: 'Réponse', commentaire: msg
+        });
+        if (error) { alert('Erreur lors de l\'envoi de la réponse'); console.error(error); return; }
+        document.getElementById(`form-reponse-${commentaireId}`).style.display = 'none';
+        document.getElementById(`form-reponse-${commentaireId}`).innerHTML = '';
+        afficherCommentaires();
+    }
+
+    async function afficherPlus() {
+        const container = document.getElementById('commentaires-container');
+        const bouton = document.querySelector('#afficher-plus button');
+        const instruction = document.getElementById('instruction-texte');
+        if (!commentairesAffiches) {
+            commentairesAffiches = true;
+            bouton.textContent = 'Masquer les commentaires';
+            instruction.textContent = 'Cliquez pour masquer les commentaires...';
+            container.style.display = 'block';
+            await afficherCommentaires();
+        } else {
+            commentairesAffiches = false;
+            bouton.textContent = 'Afficher plus';
+            instruction.textContent = 'Cliquez pour afficher plus de contenu...';
+            container.style.display = 'none';
+        }
+    }
+
+    async function activerModeAdmin() {
+        const pwd = prompt('Mot de passe admin :');
+        if (!pwd) return;
+        const { data, error } = await _supabase.rpc('verifier_mot_de_passe_admin', { password: pwd });
+        if (error || !data) { alert('Mot de passe incorrect'); return; }
+        motDePasseAdmin = pwd;
+        document.body.classList.add('mode-admin');
+        alert('Mode admin activé !');
+    }
+
+    async function supprimerCommentaire(id) {
+        if (!confirm('Supprimer ce commentaire ?')) return;
+        const { error } = await _supabase.rpc('supprimer_commentaire_admin', {
+            commentaire_id: id,
+            password: motDePasseAdmin
+        });
+        if (error) { alert('Erreur : ' + error.message); return; }
+        afficherCommentaires();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('contact-form');
+        if (!form) return;
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const nomInput = this.querySelector('input[type="text"]');
+            const lieuSelect = document.getElementById('lieu-select');
+            const autreInput = document.getElementById('autre-lieu');
+            const commentaireInput = document.getElementById('commentaire-input');
+            if (!nomInput || !lieuSelect || !autreInput || !commentaireInput) return;
+            const nom = nomInput.value.trim();
+            const lieu = lieuSelect.value === 'Autre' ? autreInput.value.trim() : lieuSelect.value;
+            const commentaire = commentaireInput.value.trim();
+            if (!nom || !lieu) { alert('Veuillez remplir les champs obligatoires'); return; }
+            const { error } = await _supabase.from('commentaires').insert({
+                nom, lieu, commentaire: commentaire || 'Pas de commentaire'
+            });
+            if (error) { alert('Erreur lors de l\'envoi'); console.error(error); return; }
+            nomInput.value = '';
+            lieuSelect.value = '';
+            autreInput.value = '';
+            autreInput.style.display = 'none';
+            commentaireInput.value = '';
+            document.getElementById('afficher-plus').scrollIntoView({ behavior: 'smooth' });
+            if (commentairesAffiches) {
+                await afficherCommentaires();
+            } else {
+                afficherPlus();
+            }
+        });
+    });
     </script>
 
 </main>
+
+<div class="admin-link"><a href="#" onclick="activerModeAdmin();return false;">Admin</a></div>
 
 </body>
 </html>
