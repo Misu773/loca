@@ -307,6 +307,40 @@
     background: #962d22;
 }
 
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+.option-card {
+    background: white;
+    border: 2px solid #c62121;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+.option-card:hover {
+    transform: translateY(-4px);
+}
+.option-card h3 {
+    color: #c62121;
+    margin: 0 0 10px;
+}
+.option-card p {
+    margin: 6px 0;
+    color: #292929;
+}
+.option-card .prix {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #e13560;
+    margin-top: 12px;
+}
+
     </style>
     <head>
    
@@ -369,7 +403,7 @@
     <p>Veuillez remplir les informations ci-dessous pour planifier votre voyage</p>
     
 
-    <form style="max-width:500px; margin:auto; text-align:left;">
+    <form id="destination-form" style="max-width:500px; margin:auto; text-align:left;">
         <label><strong>D'où venez-vous ?*</strong></label>
         <input type="text" required placeholder="Ex: Paris, France" style="width:100%; padding:8px; margin-bottom:15px;">
         
@@ -379,8 +413,9 @@
         
 
         <label><strong>Budget (EU)*</strong></label>
-        <input type="number" required min="0" step="100.00" placeholder="(minimum)" style="width:100%; padding:8px; margin-bottom:15px;">
-    
+        <input type="number" required min="0" step="50.00" placeholder="(minimum)" style="width:100%; padding:8px; margin-bottom:15px;">
+        
+        <input type="number" required min="0" step="50.00" placeholder="(maximum)" style="width:100%; padding:8px; margin-bottom:15px;">
         
         <!-- À l'intérieur du formulaire dans la section Votre Destination -->
         <label><strong>Combien de voyageur ?*</strong></label>
@@ -404,7 +439,7 @@
             div.style.marginBottom = '10px';
             div.innerHTML = `
                 <label><strong>Âge du voyageur ${i}*</strong></label>
-                <input type="number" min="0" max="120" placeholder="Ex: 25" 
+                <input type="number" min="0" max="120"  
                        style="width:100%; padding:8px;">
             `;
             agesContainer.appendChild(div);
@@ -417,20 +452,50 @@
     });
     </script>
 
-    <label><strong>Moyen de transport ?*</strong></label>
-        <input type="text" required placeholder="Ex: Avion, Train" style="width:100%; padding:8px; margin-bottom:15px;">
-
 
         <button type="submit" class="btn" style="width:100%; padding:14px; background:#e17a35; color:white; border:none; border-radius:8px; cursor:pointer;">
             Calculer mon voyage
         </button>
     </form>
+
+    <div id="options-voyage" style="display:none;">
+    <h2 style="text-align:center;">Options de voyage</h2>
+    <p id="recap-voyage" style="text-align:center;color:#666;"></p>
+    <div class="options-grid">
+        <div class="option-card">
+            <h3>Vol + Hôtel</h3>
+            <p class="transport">✈️ Transport : Avion</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+        <div class="option-card">
+            <h3>Tout Inclus</h3>
+            <p class="transport">🚌 Transport : Bus + Vol</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+        <div class="option-card">
+            <h3>Circuit Guidé</h3>
+            <p class="transport">🚐 Transport : Minibus + Guide</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+        <div class="option-card">
+            <h3>Aventure</h3>
+            <p class="transport">🚗 Transport : Voiture + Camping</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+    </div>
+    <button onclick="retourFormulaire()" class="btn" style="margin-top:20px; background:#e17a35; color:white;">← Retour au formulaire</button>
+</div>
+
     </section>
 
 
  <section id="carte" style="text-align:center">
     <h2>Où nous trouver</h2>
-    <iframe src="https://www.google.com/maps?q=Lille&output=embed"></iframe>
+    <iframe src="https://www.google.com/maps?q=Lille&output=embed" style="width:100%; height:500px;"></iframe>
     
 
     <section>
@@ -795,6 +860,47 @@
             }
         });
     });
+
+document.getElementById('destination-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const origine = this.querySelector('input[placeholder="Ex: Paris, France"]').value.trim();
+    const destination = this.querySelector('input[placeholder="Ex: Tokyo, Japon"]').value.trim();
+    const budget = parseFloat(this.querySelector('input[type="number"]').value) || 0;
+    const nbVoyageurs = parseInt(document.getElementById('nombre-voyageurs').value) || 1;
+    
+    const ages = [];
+    document.querySelectorAll('#ages-container input').forEach(inp => {
+        const age = parseInt(inp.value);
+        if (!isNaN(age)) ages.push(age);
+    });
+
+    document.getElementById('recap-voyage').textContent = 
+        `${origine} → ${destination} · ${nbVoyageurs} voyageur(s)` +
+        (ages.length ? ` (âges : ${ages.join(', ')})` : '');
+
+    const prixBase = budget * 0.85;
+    const options = [
+        { prix: (prixBase * 1.0 * nbVoyageurs).toFixed(0) },
+        { prix: (prixBase * 1.4 * nbVoyageurs).toFixed(0) },
+        { prix: (prixBase * 1.8 * nbVoyageurs).toFixed(0) },
+        { prix: (prixBase * 0.7 * nbVoyageurs).toFixed(0) }
+    ];
+
+    const cards = document.querySelectorAll('.option-card .prix');
+    options.forEach((opt, i) => {
+        cards[i].textContent = opt.prix + ' €';
+    });
+
+    document.getElementById('destination-form').style.display = 'none';
+    document.getElementById('options-voyage').style.display = 'block';
+});
+
+function retourFormulaire() {
+    document.getElementById('options-voyage').style.display = 'none';
+    document.getElementById('destination-form').style.display = 'block';
+}
+
     </script>
 
 </main>
