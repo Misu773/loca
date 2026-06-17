@@ -337,8 +337,16 @@
 .option-card .prix {
     font-size: 1.5em;
     font-weight: bold;
-    color: #e13560;
+    color: #1d191a;
     margin-top: 12px;
+}
+
+#itineraire {
+    text-align: left;
+    line-height: 1.6;
+}
+#itineraire h3 {
+    color: #c62121;
 }
 
     </style>
@@ -462,27 +470,27 @@
     <h2 style="text-align:center;">Options de voyage</h2>
     <p id="recap-voyage" style="text-align:center;color:#666;"></p>
     <div class="options-grid">
-        <div class="option-card">
-            <h3>Vol + Hôtel</h3>
+        <div class="option-card" onclick="afficherItineraire(this)">
+            <h3>Vol</h3>
             <p class="transport">✈️ Transport : Avion</p>
             <p class="details"></p>
             <p class="prix"></p>
         </div>
-        <div class="option-card">
-            <h3>Tout Inclus</h3>
-            <p class="transport">🚌 Transport : Bus + Vol</p>
-            <p class="details"></p>
-            <p class="prix"></p>
-        </div>
-        <div class="option-card">
-            <h3>Circuit Guidé</h3>
-            <p class="transport">🚐 Transport : Minibus + Guide</p>
-            <p class="details"></p>
-            <p class="prix"></p>
-        </div>
-        <div class="option-card">
+        <div class="option-card" onclick="afficherItineraire(this)">
             <h3>Aventure</h3>
-            <p class="transport">🚗 Transport : Voiture + Camping</p>
+            <p class="transport">🚲 Transport : Vélo</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+        <div class="option-card" onclick="afficherItineraire(this)">
+            <h3>Transport en commun</h3>
+            <p class="transport">🚂🚌 Transport : Train / Bus</p>
+            <p class="details"></p>
+            <p class="prix"></p>
+        </div>
+        <div class="option-card" onclick="afficherItineraire(this)">
+            <h3>Voiture</h3>
+            <p class="transport">🚗 Transport : Voiture</p>
             <p class="details"></p>
             <p class="prix"></p>
         </div>
@@ -496,6 +504,14 @@
  <section id="carte" style="text-align:center">
     <h2>Où nous trouver</h2>
     <iframe src="https://www.google.com/maps?q=Lille&output=embed" style="width:100%; height:500px;"></iframe>
+</section>
+
+    <div id="itineraire" style="display:none; max-width:800px; margin:20px auto; padding:25px; background:#f9f9f9; border:2px solid #c62121; border-radius:14px;">
+        <button onclick="fermerItineraire()" style="float:right; background:#c62121; color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;">✕</button>
+        <h3 style="margin-top:0;">🗺️ Itinéraire</h3>
+        <p id="texte-itineraire"></p>
+        <a id="lien-maps" href="javascript:void(0)" target="_blank" class="btn" style="display:inline-block; margin-top:10px;">Voir l'itinéraire complet →</a>
+    </div>
     
 
     <section>
@@ -863,33 +879,46 @@
 
 document.getElementById('destination-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    
-    const origine = this.querySelector('input[placeholder="Ex: Paris, France"]').value.trim();
-    const destination = this.querySelector('input[placeholder="Ex: Tokyo, Japon"]').value.trim();
-    const budget = parseFloat(this.querySelector('input[type="number"]').value) || 0;
+
+    const inputs = this.querySelectorAll('input[type="text"]');
+    const origine = inputs[0].value.trim();
+    const destination = inputs[1].value.trim();
+
+    const budgetMin = parseFloat(this.querySelector('input[placeholder="(minimum)"]').value) || 0;
+    const budgetMax = parseFloat(this.querySelector('input[placeholder="(maximum)"]').value) || 0;
+    const budgetMoyen = budgetMax > 0 ? (budgetMin + budgetMax) / 2 : budgetMin;
+
     const nbVoyageurs = parseInt(document.getElementById('nombre-voyageurs').value) || 1;
-    
+
     const ages = [];
     document.querySelectorAll('#ages-container input').forEach(inp => {
         const age = parseInt(inp.value);
         if (!isNaN(age)) ages.push(age);
     });
 
-    document.getElementById('recap-voyage').textContent = 
-        `${origine} → ${destination} · ${nbVoyageurs} voyageur(s)` +
-        (ages.length ? ` (âges : ${ages.join(', ')})` : '');
+    const recap = document.getElementById('recap-voyage');
+    recap.innerHTML = `<strong>${origine}</strong> → <strong>${destination}</strong> · ${nbVoyageurs} voyageur(s)` +
+        (ages.length ? ` (âges : ${ages.join(', ')})` : '') +
+        (budgetMax > 0 ? ` · Budget : ${budgetMin}€ – ${budgetMax}€` : budgetMin > 0 ? ` · Budget : ${budgetMin}€` : '');
 
-    const prixBase = budget * 0.85;
+    const enfants = ages.filter(a => a < 12).length;
+    const facteurEnfant = 1 - (enfants / nbVoyageurs) * 0.3;
+
     const options = [
-        { prix: (prixBase * 1.0 * nbVoyageurs).toFixed(0) },
-        { prix: (prixBase * 1.4 * nbVoyageurs).toFixed(0) },
-        { prix: (prixBase * 1.8 * nbVoyageurs).toFixed(0) },
-        { prix: (prixBase * 0.7 * nbVoyageurs).toFixed(0) }
+        { prix: (budgetMoyen * 1.0 * nbVoyageurs * facteurEnfant).toFixed(0), transport: '✈️ Vol' },
+        { prix: (budgetMoyen * 1.4 * nbVoyageurs * facteurEnfant).toFixed(0), transport: '🚲 Vélo + Camping' },
+        { prix: (budgetMoyen * 1.8 * nbVoyageurs * facteurEnfant).toFixed(0), transport: '🚂🚌 Train / Bus' },
+        { prix: (budgetMoyen * 0.7 * nbVoyageurs * facteurEnfant).toFixed(0), transport: '🚗 Voiture' }
     ];
 
-    const cards = document.querySelectorAll('.option-card .prix');
+    const cards = document.querySelectorAll('.option-card');
     options.forEach((opt, i) => {
-        cards[i].textContent = opt.prix + ' €';
+        cards[i].querySelector('.transport').textContent = opt.transport;
+        const details = cards[i].querySelector('.details');
+        details.innerHTML = `${origine} → ${destination}<br>${nbVoyageurs} voyageur(s)` +
+            (ages.length ? ` (${ages.join(', ')})` : '') +
+            (enfants > 0 ? `<br><small>Réduction enfant ${enfants}×</small>` : '');
+        cards[i].querySelector('.prix').textContent = opt.prix + ' €';
     });
 
     document.getElementById('destination-form').style.display = 'none';
@@ -899,6 +928,43 @@ document.getElementById('destination-form').addEventListener('submit', function(
 function retourFormulaire() {
     document.getElementById('options-voyage').style.display = 'none';
     document.getElementById('destination-form').style.display = 'block';
+}
+
+function afficherItineraire(carte) {
+    const origine = document.querySelector('#destination-form input[placeholder="Ex: Paris, France"]').value.trim() || 'Paris';
+    const destination = document.querySelector('#destination-form input[placeholder="Ex: Tokyo, Japon"]').value.trim() || 'Tokyo';
+    const transport = carte.querySelector('.transport')?.textContent || 'Transport';
+    const prix = carte.querySelector('.prix')?.textContent || '';
+    const nbVoyageurs = document.getElementById('nombre-voyageurs')?.value || 1;
+
+    const ages = [];
+    document.querySelectorAll('#ages-container input').forEach(inp => {
+        const age = parseInt(inp.value);
+        if (!isNaN(age)) ages.push(age);
+    });
+
+    document.getElementById('texte-itineraire').innerHTML = `
+        <strong>${origine} → ${destination}</strong><br><br>
+        🚀 <strong>Transport</strong> : ${transport}<br>
+        👤 <strong>Voyageurs</strong> : ${nbVoyageurs}${ages.length ? ` (âges : ${ages.join(', ')})` : ''}<br>
+        💰 <strong>Prix</strong> : ${prix}<br>
+        <small style="color:#666;">* Prix estimé basé sur votre budget. Réels varient selon les compagnies.</small><br><br>
+    `;
+
+    document.getElementById('lien-maps').href =
+        `https://www.google.com/maps/dir/${encodeURIComponent(origine)}/${encodeURIComponent(destination)}`;
+
+    const iframe = document.querySelector('#carte iframe');
+    if (iframe) {
+        iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(destination)}&output=embed`;
+    }
+
+    document.getElementById('itineraire').style.display = 'block';
+    document.getElementById('carte').scrollIntoView({ behavior: 'smooth' });
+}
+
+function fermerItineraire() {
+    document.getElementById('itineraire').style.display = 'none';
 }
 
     </script>
