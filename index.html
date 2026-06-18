@@ -307,6 +307,21 @@
     background: #962d22;
 }
 
+.btn-supprimer-moi {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 3px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.75em;
+    margin-left: 8px;
+}
+.btn-supprimer-moi:hover {
+    background: #c0392b;
+}
+
 .options-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -721,11 +736,11 @@
     let commentairesAffiches = false;
     let motDePasseAdmin = '';
     // ===== Jeton utilisateur pour suppression =====
-let userToken = sessionStorage.getItem('user_token');
-if (!userToken) {
-    userToken = crypto.randomUUID();
-    sessionStorage.setItem('user_token', userToken);
-}
+    let userToken = sessionStorage.getItem('user_token');
+    if (!userToken) {
+        userToken = crypto.randomUUID();
+        sessionStorage.setItem('user_token', userToken);
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         const lieuSelect = document.getElementById('lieu-select');
@@ -775,6 +790,7 @@ if (!userToken) {
                 <p>"${c.commentaire}"</p>
                 <button class="btn-repondre" onclick="repondre('${c.id}')">Répondre</button>
                 <button class="btn-supprimer" onclick="supprimerCommentaire('${c.id}')">🗑 Supprimer</button>
+                ${c.user_token === userToken ? '<button class="btn-supprimer-moi" onclick="supprimerMonCommentaire(\'' + c.id + '\')">🗑 Supprimer</button>' : ''}
                 <div id="reponses-${c.id}" class="reponses"></div>
                 <div id="form-reponse-${c.id}" class="form-reponse" style="display:none;"></div>
             `;
@@ -814,7 +830,7 @@ if (!userToken) {
         const msg = document.getElementById(`reponse-msg-${commentaireId}`)?.value.trim();
         if (!nom || !msg) { alert('Veuillez remplir tous les champs'); return; }
         const { error } = await _supabase.from('commentaires').insert({
-            parent_id: commentaireId, nom, lieu: 'Réponse', commentaire: msg
+            parent_id: commentaireId, nom, lieu: 'Réponse', commentaire: msg, user_token: userToken
         });
         if (error) { alert('Erreur lors de l\'envoi de la réponse'); console.error(error); return; }
         document.getElementById(`form-reponse-${commentaireId}`).style.display = 'none';
@@ -860,6 +876,16 @@ if (!userToken) {
         afficherCommentaires();
     }
 
+    async function supprimerMonCommentaire(id) {
+        if (!confirm('Supprimer votre commentaire ?')) return;
+        const { error } = await _supabase.rpc('supprimer_mon_commentaire', {
+            commentaire_id: id,
+            token: userToken
+        });
+        if (error) { alert('Erreur : ' + error.message); return; }
+        afficherCommentaires();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('contact-form');
         if (!form) return;
@@ -875,7 +901,7 @@ if (!userToken) {
             const commentaire = commentaireInput.value.trim();
             if (!nom || !lieu) { alert('Veuillez remplir les champs obligatoires'); return; }
             const { error } = await _supabase.from('commentaires').insert({
-                nom, lieu, commentaire: commentaire || 'Pas de commentaire'
+                nom, lieu, commentaire: commentaire || 'Pas de commentaire', user_token: userToken
             });
             if (error) { alert('Erreur lors de l\'envoi'); console.error(error); return; }
             nomInput.value = '';
