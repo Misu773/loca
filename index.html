@@ -720,6 +720,12 @@
 
     let commentairesAffiches = false;
     let motDePasseAdmin = '';
+    // ===== Jeton utilisateur pour suppression =====
+let userToken = sessionStorage.getItem('user_token');
+if (!userToken) {
+    userToken = crypto.randomUUID();
+    sessionStorage.setItem('user_token', userToken);
+}
 
     document.addEventListener('DOMContentLoaded', function() {
         const lieuSelect = document.getElementById('lieu-select');
